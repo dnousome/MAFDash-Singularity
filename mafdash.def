@@ -1,0 +1,11 @@
+BootStrap: docker
+From: r-base
+%post
+
+apt-get update
+apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libcairo2-dev libxt-dev pandoc
+R --no-echo -e 'install.packages("Cairo")'
+R --no-echo -e 'install.packages("BiocManager"); library("BiocManager"); BiocManager::install(c("TCGAbiolinks", "maftools", "ComplexHeatmap", "GenomicRanges", "IRanges"))'
+R --no-echo -e 'install.packages("MAFDash")'
+mkdir -p /maf/db
+mkdir -p /maf/scratch
