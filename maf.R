@@ -19,7 +19,7 @@ maf_file=args[1]
 filtered_mafdata <- filterMAF(maf_file)
 
 new_dt=filtered_mafdata %>% 
-  filter(AF<0.001) 
+  filter(AF<0.001|is.na(AF)) 
  
 
 
@@ -29,28 +29,40 @@ print(head(new_dt))
 ###Run MAFDASH
 filtered_maf <- read.maf(new_dt)
 
-tcgacompare_file <- file.path(getwd(),"tcga_compare.png")
+tcgacompare_file <- file.path(dirname(args[2]),"tcga_compare.png")
 png(tcgacompare_file,width=8, height=6, units="in", res=400)
 tcgaCompare(filtered_maf,tcga_capture_size = NULL)
 dev.off()
 
+if (length(unique(filtered_maf@data$Tumor_Sample_Barcode))>1){
+  custom_onco <- generateOncoPlot(filtered_maf)
 
-custom_onco <- generateOncoPlot(filtered_maf)
-
-#oncoplot(filtered_maf)
-customplotlist <- list("summary_plot"=T,
+  #oncoplot(filtered_maf)
+  customplotlist <- list("summary_plot"=T,
                        "burden"=T,
                        "TCGA Comparison"=tcgacompare_file,
                        "oncoplot"=T,
                        "Annotated Oncoplot"=custom_onco
-)
+  )
 
-## Filename to output to; if output directory doesn't exist, it will be created
-html_filename=file.path(getwd(),args[2])
+  ## Filename to output to; if output directory doesn't exist, it will be created
+  html_filename=file.path(args[2])
+}else{
+
+    customplotlist <- list("summary_plot"=T,
+                           "burden"=T,
+                           "TCGA Comparison"=tcgacompare_file,
+                           "oncoplot"=F
+    )
+    
+    ## Filename to output to; if output directory doesn't exist, it will be created
+    html_filename=file.path(args[2])
+  }
+
 
 ## Render dashboard
 getMAFDashboard(MAFfilePath = filtered_maf,
                 plotList = customplotlist,
-                outputFileName = html_filename, 
-                outputFilePath=getwd(),
+                outputFileName = basename(args[2]), 
+                outputFilePath=dirname(args[2]),
                 outputFileTitle = "Customized Dashboard")

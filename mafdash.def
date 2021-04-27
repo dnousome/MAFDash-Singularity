@@ -1,11 +1,17 @@
 BootStrap: docker
 From: r-base
-%post
+%help
+Container with R and Bioconductor to setup MAFdash and other MAF related tools
 
+%files 
+/home/dnousome/projects/MAF/maf.R /maf/program/maf.R
+
+%post
 apt-get update
 apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libcairo2-dev libxt-dev pandoc
 R --no-echo -e 'install.packages("Cairo")'
 R --no-echo -e 'install.packages("BiocManager"); library("BiocManager"); BiocManager::install(c("TCGAbiolinks", "maftools", "ComplexHeatmap", "GenomicRanges", "IRanges"))'
 R --no-echo -e 'install.packages("MAFDash")'
-mkdir -p /maf/db
-mkdir -p /maf/scratch
+mkdir -p /maf/program
+
+chmod -R o+rX /maf/program 
